@@ -1,0 +1,16 @@
+extends layout
+
+block content
+    .mdc-layout-grid
+        .mdc-layout-grid__inner
+            .mdc-layout-grid__cell
+                h1
+                    i.material-icons.md-36.blue directions_car
+                    | &nbsp#{title}
+                form(action="/inventory/vehicle-instances/create", method="get")
+                    button.mdc-button.mdc-button--raised(type="submit") New Instance
+                div.mdc-list
+                    for vehicleInstance in vehicleInstances
+                        a(href=vehicleInstance.url).mdc-list-item
+                            span.mdc-list-item-text #[strong !{vehicleInstance.vehicle.brand} !{vehicleInstance.vehicle.model}] #{new Date(vehicleInstance.year).getFullYear()} #{vehicleInstance.priceUSD}$
+

@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  div.header-text
+    h1
+      i.material-icons.md-36.blue battery_charging_full
+      | !{title}
+  hr
+
+  div.mdc-list
+    a(href="/inventory/categories").mdc-list-item
+      span.mdc-list-item-text #[strong Categories:&nbsp]!{data.categoryCount}
+    a(href="/inventory/vehicles").mdc-list-item
+      span.mdc-list-item-text #[strong Vehicles:&nbsp]!{data.vehicleCount}
+    a(href="/inventory/vehicle-instances").mdc-list-item
+      span.mdc-list-item-text #[strong Vehicle Instances:&nbsp]!{data.vehicleInstanceCount}

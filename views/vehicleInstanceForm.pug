@@ -1,0 +1,61 @@
+extends layout
+
+block content
+    .mdc-layout-grid
+        .mdc-layout-grid__inner
+            .mdc-layout-grid__cell
+                h1=title
+                form(action="" method="post")
+                    // select vehicle
+                    div
+                        label(for="vehicle") Select Vehicle 
+                        select#vehicle(name="vehicle")
+                            for vehicle in vehicles
+                                if (vehicleInstance && vehicleInstance.vehicle.toString() === vehicle._id.toString())
+                                    option(value=vehicle._id selected)=`${vehicle.brand} ${vehicle.model}`
+                                else
+                                    option(value=vehicle._id)=`${vehicle.brand} ${vehicle.model}`
+                    // input year
+                    div
+                        label(for="year_id") Select Year 
+                        select#year_id(name="year_num")
+                            for year in years
+                                if (vehicleInstance && new Date(vehicleInstance.year).getFullYear() === year)
+                                    option(value=year selected)=year
+                                else
+                                    option(value=year)=year
+                    // input price
+                    div
+                        label(for="price_usd") Price USD 
+                        input#price_usd(type="number" name="priceUSD" value=vehicleInstance && vehicleInstance.priceUSD)
+                    // input max speed
+                    div
+                        label(for="max_speed_kmh") Max speed km/h 
+                        input#max_speed_kmh-speed(type="number" name="max_speed_kmh" value=vehicleInstance && vehicleInstance.max_speed_kmh)
+                    // input max range
+                    div
+                        label(for="max_range_km") Max range km 
+                        input#max_range_km(type="number" name="max_range_km" value=vehicleInstance && vehicleInstance.max_range_km)
+                    // input battery_kwh
+                    div
+                        label(for="battery_kwh") Battery capacity kw/h 
+                        input#battery_kwh(type="number" name="battery_kwh" value=vehicleInstance && vehicleInstance.battery_kwh)
+                    // select condition
+                    div
+                        label(for="condition") Condition 
+                        select#condition(name="condition")
+                            for conditionType in conditionTypes
+                                if (vehicleInstance && vehicleInstance.condition.toString() === conditionType.toString())
+                                    option(value=conditionType selected)=conditionType
+                                else
+                                    option(value=conditionType)=conditionType
+
+                    div
+                        button.mdc-button.mdc-button--raised(type="submit") Submit
+                // Errors view
+                if errors
+                    h3 Errors
+                    div
+                        for error in errors
+                            p=error.msg
+

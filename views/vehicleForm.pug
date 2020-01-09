@@ -1,0 +1,51 @@
+extends layout
+
+block content
+    .mdc-layout-grid
+        .mdc-layout-grid__inner
+            .mdc-layout-grid__cell.mdc-layout-grid__cell
+                h2=title
+                form(action="" method="post")
+                    .mdc-text-field.brand
+                        input.mdc-text-field__input#brand(type="text" name="brand" value=vehicle && vehicle.brand required)
+                        label.mdc-floating-label(for="brand") Brand
+                        .mdc-line-ripple
+                    .mdc-text-field.model
+                        input.mdc-text-field__input#model(type="text" name="model" value=vehicle && vehicle.model required)
+                        label.mdc-floating-label(for="model") Model
+                        .mdc-line-ripple
+                    input#categoryID(type="hidden" name="categoryID" value=vehicle && vehicle.category.toString())
+                    .mdc-select.mdc-select--required.category
+                        .mdc-select__anchor.category-width
+                            i.mdc-select__dropdown-icon
+                            .mdc-select__selected-text
+                            span.mdc-floating-label Pick category
+                            .mdc-line-ripple
+                        .mdc-select__menu.mdc-menu.mdc-menu-surface.category-width
+                            ul.mdc-list
+                                if vehicle
+                                    li.mdc-list-item(data-value="")
+                                else
+                                    li.mdc-list-item.mdc-list-item--selected(data-value="selected" aria-selected="true")
+                                for category in categories
+                                    if (vehicle && category._id.toString() === vehicle.category.toString())
+                                        li.mdc-list-item.mdc-list-item--selected(data-value=category._id.toString() aria-selected="true")=category.name
+                                    else
+                                        li.mdc-list-item(data-value=category._id.toString())=category.name
+                    .mdc-text-field.mdc-text-field--textarea.description
+                        textarea.mdc-text-field__input#description(name="description" cols="20" rows="5")=vehicle && vehicle.description
+                        .mdc-notched-outline
+                            .mdc-notched-outline__leading
+                            .mdc-notched-outline__notch
+                                label.mdc-floating-label(for="textarea") Description
+                            .mdc-notched-outline__trailing
+                    .submit-btn
+                        button.mdc-button.mdc-button--raised(type="submit") SUBMIT
+        .mdc-layout-grid__inner
+            .mdc-layout-grid__cell
+                if errors
+                    ul.mdc-list
+                        for error in errors
+                            li.mdc-list-item
+                                span.mdc-list-item__text=`${error.param} ${error.msg}`
+

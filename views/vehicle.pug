@@ -1,0 +1,41 @@
+extends layout
+block content
+    .mdc-layout-grid
+        .mdc-layout-grid__inner
+            .mdc-layout-grid__cell.mdc-layout-grid__cell--span-12
+                h1=title
+                p=vehicle.description
+                div.vehicle-controls__container
+                    button.mdc-button.mdc-button--raised.vehicle-controls__update(onClick=`window.open('${vehicle.url}/update', '_self')`)
+                        i.material-icons.mdc-button__icon(aria-hidden="true") create
+                        span.mdc-button__label Update
+                        span.mdc-button__ripple
+                    button.mdc-button.mdc-button--outlined.vehicle-controls__delete
+                        i.material-icons.mdc-button__icon(aria-hidden="true") remove_circle_outline
+                        span.mdc-button__label Delete
+                        span.mdc-button__ripple
+                if vehicleInstances.length > 0
+                    h3=`${title} In Stoke`
+                        ul.mdc-list.mdc-list--two-line
+                            for vehicleInstance, index in vehicleInstances
+                                li.mdc-list-item.vehicleInstanceLink(onClick=`window.open('${vehicleInstance.url}', '_self')`)
+                                    span.mdc-list-item__graphic ##{index + 1}
+                                    span.mdc-list-item__text 
+                                        span.mdc-list-item__primary-text #[strong Price:] #{vehicleInstance.priceUSD}$
+                                        span.mdc-list-item__secondary-text #[strong Year:] #{new Date(vehicleInstance.year).getFullYear()}
+                                li.mdc-list-divider(role="separator")
+                else
+                    h3 !Out of stock
+                .mdc-dialog.delete-confirm-dialog(role="alertdialog" aria-modal="true" aria-labelledby="my-dialog-title" aria-describedby="my-dialog-content")
+                    .mdc-dialog__container
+                        .mdc-dialog__surface
+                            h2#delete-dialog-title.mdc-dialog__title Delete Vehicle
+                            .mdc-dialog__content
+                                p Are you sure you want to delete #[strong #{vehicle.brand} #{vehicle.model}]?
+                            footer.mdc-dialog__actions
+                                form(action=vehicle._id +'/delete' method="post")
+                                    button.mdc-button.mdc-dialog__button(type="button" data-mdc-dialog-action="close")
+                                        span.mdc-button__label Cancel
+                                    button.mdc-button.mdc-button--raised.mdc-dialog__button(type="submit" data-mdc-dialog-action="delete")
+                                        span.mdc-button__label Delete
+                    .mdc-dialog__scrim
