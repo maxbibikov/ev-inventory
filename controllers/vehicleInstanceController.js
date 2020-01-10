@@ -1,4 +1,15 @@
 const async = require('async');
+const multer = require('multer');
+const path = require('path');
+const crypto = require('crypto');
+const storage = multer.diskStorage({
+    destination: (req, file, callback) => callback(null, 'public/images/'),
+    filename: (req, file, callback) => {
+        const uid = crypto.randomBytes(16).toString('hex');
+        callback(null, `${uid}${path.extname(file.originalname)}`);
+    }
+});
+const upload = multer({ storage });
 const { body, sanitizeBody, validationResult } = require('express-validator');
 
 // Models
@@ -93,6 +104,7 @@ exports.vehicleInstance_create_get = (req, res, next) => {
 };
 
 exports.vehicleInstance_create_post = [
+    upload.single('vehicle_photo'),
     body('vehicle', 'Vehicle is not valid')
         .notEmpty()
         .exists()
@@ -136,6 +148,7 @@ exports.vehicleInstance_create_post = [
 
     (req, res, next) => {
         const errors = validationResult(req);
+        const { file } = req;
         const {
             vehicle,
             max_speed_kmh,
@@ -153,12 +166,11 @@ exports.vehicleInstance_create_post = [
             battery_kwh,
             condition,
             year: new Date().setFullYear(year_num),
-            priceUSD
+            priceUSD,
+            photo: file.filename
         });
-        console.log('vehicleInstance: ', vehicleInstance);
 
         if (!errors.isEmpty()) {
-            console.log('errors: ', errors.array());
             const years = generateYears(1990);
             const conditionTypes = VehicleInstance.schema.path('condition')
                 .enumValues;
@@ -195,7 +207,9 @@ exports.vehicleInstance_update_get = (req, res, next) => {
     return async.parallel(
         {
             vehicleInstance: callback =>
-                VehicleInstance.findById(vehicleInstanceID).exec(callback),
+                VehicleInstance.findById(vehicleInstanceID)
+                    .populate('vehicle')
+                    .exec(callback),
             vehicles: callback => Vehicle.find({}).exec(callback)
         },
         (err, { vehicleInstance, vehicles }) => {
@@ -210,7 +224,9 @@ exports.vehicleInstance_update_get = (req, res, next) => {
             const conditionTypes = VehicleInstance.schema.path('condition')
                 .enumValues;
             return res.render('vehicleInstanceForm', {
-                title: 'Update Vehicle Instance',
+                title: `${vehicleInstance.vehicle.brand} ${
+                    vehicleInstance.vehicle.model
+                } ${new Date(vehicleInstance.year).getFullYear()}`,
                 vehicleInstance,
                 conditionTypes,
                 vehicles,
@@ -221,6 +237,7 @@ exports.vehicleInstance_update_get = (req, res, next) => {
 };
 
 exports.vehicleInstance_update_post = [
+    upload.single('vehicle_photo'),
     body('vehicle', 'Vehicle is not valid')
         .notEmpty()
         .exists()
@@ -270,8 +287,10 @@ exports.vehicleInstance_update_post = [
             battery_kwh,
             year_num,
             priceUSD,
-            condition
+            condition,
+            photo
         } = req.body;
+        const { file } = req;
         const vehicleInstance = new VehicleInstance({
             _id: req.params.id,
             vehicle,
@@ -280,7 +299,8 @@ exports.vehicleInstance_update_post = [
             battery_kwh,
             year: new Date().setFullYear(year_num),
             priceUSD,
-            condition
+            condition,
+            photo: file ? file.filename : photo
         });
 
         if (!errors.isEmpty()) {

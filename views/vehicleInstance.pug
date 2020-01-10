@@ -18,6 +18,8 @@ block content
                         form(action=`${vehicleInstance.url}/update` method="get")
                             button.mdc-button.mdc-button--raised(type="submit") Update
                                 span.mdc-button__ripple
+                if vehicleInstance.photo_url
+                    img(src=vehicleInstance.photo_url, alt="")
 
                 ul.mdc-list
                     li.mdc-list-item

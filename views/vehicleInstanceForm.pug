@@ -5,7 +5,15 @@ block content
         .mdc-layout-grid__inner
             .mdc-layout-grid__cell
                 h1=title
-                form(action="" method="post")
+                form(action="" method="post" enctype="multipart/form-data")
+                    // vehicle photo
+                    if vehicleInstance.photo_url
+                        div
+                            input(type="hidden" name="photo", value=vehicleInstance.photo)
+                            img(src=vehicleInstance.photo_url, alt="")
+                    div
+                        label(for="vehicle_photo") Vehicle photo
+                        input#vehicle_photo(type="file" name="vehicle_photo" accept="image/png image/jpeg")
                     // select vehicle
                     div
                         label(for="vehicle") Select Vehicle 

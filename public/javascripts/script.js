@@ -28,12 +28,10 @@ const deleteConfirmDialog = document.querySelector('.delete-confirm-dialog');
 const deleteConfirmDialogMDC = new mdc.dialog.MDCDialog(deleteConfirmDialog);
 
 vehicleDeleteButton.listen('click', () => {
-    deleteConfirmDialogMDC.open()
+    deleteConfirmDialogMDC.open();
 });
 
-deleteConfirmDialogMDC.listen('MDCDialog:closing', (event) => {
-    
-    if (event.detail.action === 'delete'){
-        console.log('DELETEDDG');
+deleteConfirmDialogMDC.listen('MDCDialog:closing', event => {
+    if (event.detail.action === 'delete') {
     }
-})
+});

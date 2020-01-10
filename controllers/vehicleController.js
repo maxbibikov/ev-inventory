@@ -51,7 +51,6 @@ exports.vehicle_detail = (req, res, next) => {
 exports.vehicle_create_get = (req, res, next) => {
     return Category.find({}).exec((err, categories) => {
         if (err) {
-            console.log('EHERE');
             return next(err);
         }
 
@@ -174,8 +173,6 @@ exports.vehicle_update_post = [
             return Category.find({})
                 .exec()
                 .then(categories => {
-                    console.log('categories: ', categories);
-                    console.log('vehicle: ', vehicle);
                     return res.render('vehicleForm', {
                         title: 'Update Vehicle',
                         vehicle,
@@ -205,8 +202,6 @@ exports.vehicle_delete_post = (req, res, next) => {
                 VehicleInstance.find({ vehicle: vehicleID }).exec(callback)
         },
         (err, { vehicle, vehicleInstances }) => {
-            console.log('err: ', err);
-            console.log('vehicleInstances: ', vehicleInstances);
             if (err) {
                 return next(err);
             }
