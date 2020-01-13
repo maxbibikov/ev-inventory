@@ -25,7 +25,7 @@ exports.vehicleInstance_list = (req, res, next) => {
             }
 
             return res.render('vehicleInstances', {
-                title: 'Vehicle Instances',
+                title: 'Vehicle Shop',
                 vehicleInstances
             });
         });

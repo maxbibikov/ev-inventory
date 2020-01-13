@@ -1,12 +1,31 @@
 doctype html
 html
-  head
-    title= title
-    link(href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet")
-    link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
-    link(rel="stylesheet" href="/stylesheets/style.css")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    script(src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js")
-  body
-    block content
+    head
+        title= title
+        link(href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
+        link(rel="stylesheet" href="/stylesheets/style.css")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        script(src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js")
+    body
+        header.mdc-top-app-bar
+            div.mdc-top-app-bar__row
+                section.mdc-top-app-bar__section.mdc-top-app-bar__section--align-start
+                    button.mdc-icon-button.material-icons.mdc-top-app-bar__navigation-icon menu
+                    span.mdc-top-app-bar__title=title
+        aside.mdc-drawer.mdc-drawer--modal
+            .mdc-drawer__content
+                nav.mdc-list
+                    a#nav_inventory.mdc-list-item(href="/inventory" aria-current="page") 
+                        span.mdc-list-item__text Home
+                    a#nav_categories.mdc-list-item(href="/inventory/categories" aria-current="page") 
+                        span.mdc-list-item__text Categories
+                    a#nav_vehicles.mdc-list-item(href="/inventory/vehicles" aria-current="page") 
+                        span.mdc-list-item__text Vehicles
+                    a#nav_vehicle_shop.mdc-list-item(href="/inventory/vehicle-instances" aria-current="page") 
+                        span.mdc-list-item__text Vehicle Shop
+        .mdc-drawer-scrim
+
+        main.main-content
+            block content
     script(src="/javascripts/script.js")
