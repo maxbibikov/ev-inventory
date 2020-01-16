@@ -10,6 +10,7 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage });
+const fs = require('fs');
 const { body, sanitizeBody, validationResult } = require('express-validator');
 
 // Models
@@ -325,7 +326,19 @@ exports.vehicleInstance_update_post = [
             vehicleInstance._id,
             vehicleInstance
         )
-            .then(updatedInstance => res.redirect(updatedInstance.url))
+            .then(updatedInstance => {
+                // remove previous image file
+                if (file) {
+                    return fs.unlink(`public/images/${photo}`, err => {
+                        if (err) {
+                            console.error(err);
+                            return res.redirect(updatedInstance.url);
+                        }
+                        return res.redirect(updatedInstance.url);
+                    });
+                }
+                return res.redirect(updatedInstance.url);
+            })
             .catch(err => next(err));
     }
 ];

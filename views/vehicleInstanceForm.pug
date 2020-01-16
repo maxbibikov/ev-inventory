@@ -9,7 +9,8 @@ block content
                     // vehicle photo
                     .vehicle-photo
                         label(for="vehicle_photo") Choose a vehicle photo: 
-                        input#vehicle_photo(type="file" name="vehicle_photo" accept="image/png image/jpeg" required)
+                        input#vehicle_photo(type="file" name="vehicle_photo" accept="image/png image/jpeg")
+                        input(type="hidden" name="photo", value=vehicleInstance && vehicleInstance.photo)
                     // select vehicle
                     input#vehicle(type="hidden" name="vehicle" value=vehicleInstance && vehicleInstance.vehicle._id)
                     .mdc-select.vehicle-select#select_vehicle
