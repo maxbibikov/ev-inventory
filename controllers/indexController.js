@@ -19,7 +19,7 @@ const stats = (req, res, next) => {
             }
 
             return res.render('index', {
-                title: 'EV Shop',
+                title: 'EV Shop Inventory',
                 data,
             });
         }

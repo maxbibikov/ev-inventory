@@ -79,6 +79,7 @@ if (vehicleControllsUpdate) {
     });
 }
 
+// DRAWER MENU
 const drawerElement = document.querySelector('.mdc-drawer');
 const drawer = new mdc.drawer.MDCDrawer(drawerElement);
 

@@ -1,15 +1,18 @@
 extends layout
 
 block content
-    h1 
-        i.material-icons.md-36.blue store
-        | &nbsp#{title}&nbsp
-        a.mdc-button.mdc-button--raised(href="categories/create")
-            div.mdc-button__ripple
-            i.material-icons.mdc-button__icon(aria-hidden="true") create
-            div.mdc-button__label(type="submit") CREATE
-    div.mdc-list
-        for category in categories
-            a(href=category.url).mdc-list-item
-                span.mdc-list-item-text #[strong !{category.name}]
+    .mdc-layout-grid
+        .mdc-layout-grid__inner
+            .mdc-layout-grid__cell.mdc-layout-grid__cell--span-12
+                h1 
+                    i.material-icons.md-36.blue store
+                    | &nbsp#{title}&nbsp
+                a.mdc-button.mdc-button--raised(href="categories/create")
+                    .mdc-button__ripple
+                    i.material-icons.mdc-button__icon(aria-hidden="true") create
+                    .mdc-button__label(type="submit") CREATE
+                .mdc-list
+                    for category in categories
+                        a(href=category.url).mdc-list-item
+                            span.mdc-list-item-text #[strong !{category.name}]
 

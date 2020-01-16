@@ -5,7 +5,7 @@ block content
             .mdc-layout-grid__cell.mdc-layout-grid__cell--span-12
                 h1=title
                 p=vehicle.description
-                div.vehicle-controls__container
+                .vehicle-controls__container
                     button.mdc-button.mdc-button--raised.vehicle-controls__update(onClick=`window.open('${vehicle.url}/update', '_self')`)
                         i.material-icons.mdc-button__icon(aria-hidden="true") create
                         span.mdc-button__label Update

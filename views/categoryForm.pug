@@ -10,9 +10,9 @@ block content
         .mdc-layout-grid__inner
             .mdc-layout-grid__cell
                 form(method="post" action="")
-                    .mdc-text-field.mdc-text-field--outlined(for="category-name")
-                        input#category-name.mdc-text-field__input(name="category_name" type="text" placeholder="Enter category name" value=category && category.name aria-label="Enter category name" required minlength=3 maxlength=15)
-                        label.mdc-floating-label Category name
+                    .mdc-text-field.mdc-text-field--outlined#category_name
+                        input.mdc-text-field__input(name="category_name" type="text" placeholder="Enter category name" value=category && category.name aria-label="Enter category name" required minlength=3 maxlength=15)
+                        label.mdc-floating-label(for="category-name") Category name
                         .mdc-line-ripple
                     .submit-btn-container
                         button.mdc-button.mdc-button--raised(type="submit")
@@ -21,4 +21,5 @@ block content
                             div.mdc-button__label(type="submit") SUBMIT
             .mdc-layout-grid__cell
             .mdc-layout-grid__cell
-
+block scripts
+    script(src="/javascripts/categoryForm.js")

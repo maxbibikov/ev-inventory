@@ -1,19 +1,23 @@
 extends layout
 
 block content
-    h1 #{title}
-    form(method="post" action=category.url+'/delete')
-        button.mdc-button.mdc-button--raised.mdc-theme--secondary-bg(type="submit")
-            div.mdc-button__ripple
-            i.material-icons.mdc-button__icon(aria-hidden="true") delete_forever
-            div.mdc-button__label DELETE
-    a.mdc-button.mdc-button--raised(href=category.url+'/update')
-        div.mdc-button__ripple
-        i.material-icons.mdc-button__icon(aria-hidden="true") update
-        div.mdc-button__label UPDATE
+    .mdc-layout-grid
+        .mdc-layout-grid__inner
+            .mdc-layout-grid__cell.mdc-layout-grid__cell--span-12
+                h3 #{title}
+                .category__delete-btn
+                    form(method="post" action=category.url+'/delete')
+                        button.mdc-button.mdc-button--raised.mdc-theme--secondary-bg(type="submit")
+                            div.mdc-button__ripple
+                            i.material-icons.mdc-button__icon(aria-hidden="true") delete_forever
+                            div.mdc-button__label DELETE
+                .category__update-btn
+                    a.mdc-button.mdc-button--raised(href=category.url+'/update')
+                        div.mdc-button__ripple
+                        i.material-icons.mdc-button__icon(aria-hidden="true") update
+                        div.mdc-button__label UPDATE
 
-    hr
-    div.mdc-list
-        for categoryVehicle in categoryVehicles
-            a(href=categoryVehicle.url).mdc-list-item
-                span.mdc-list-item-text #[strong !{categoryVehicle.brand} !{categoryVehicle.model}]
+                div.mdc-list
+                    for categoryVehicle in categoryVehicles
+                        a(href=categoryVehicle.url).mdc-list-item
+                            span.mdc-list-item-text #[strong !{categoryVehicle.brand} !{categoryVehicle.model}]

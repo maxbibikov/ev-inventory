@@ -3,67 +3,85 @@ extends layout
 block content
     .mdc-layout-grid
         .mdc-layout-grid__inner
-            .mdc-layout-grid__cell
-                h1=title
+            .mdc-layout-grid__cell.mdc-layout-grid__cell--span-4
+                h2=title
                 form(action="" method="post" enctype="multipart/form-data")
                     // vehicle photo
-                    if vehicleInstance.photo_url
-                        div
-                            input(type="hidden" name="photo", value=vehicleInstance.photo)
-                            img(src=vehicleInstance.photo_url, alt="")
-                    div
-                        label(for="vehicle_photo") Vehicle photo
-                        input#vehicle_photo(type="file" name="vehicle_photo" accept="image/png image/jpeg")
+                    .vehicle-photo
+                        label(for="vehicle_photo") Choose a vehicle photo: 
+                        input#vehicle_photo(type="file" name="vehicle_photo" accept="image/png image/jpeg" required)
                     // select vehicle
-                    div
-                        label(for="vehicle") Select Vehicle 
-                        select#vehicle(name="vehicle")
-                            for vehicle in vehicles
-                                if (vehicleInstance && vehicleInstance.vehicle.toString() === vehicle._id.toString())
-                                    option(value=vehicle._id selected)=`${vehicle.brand} ${vehicle.model}`
-                                else
-                                    option(value=vehicle._id)=`${vehicle.brand} ${vehicle.model}`
-                    // input year
-                    div
-                        label(for="year_id") Select Year 
-                        select#year_id(name="year_num")
-                            for year in years
-                                if (vehicleInstance && new Date(vehicleInstance.year).getFullYear() === year)
-                                    option(value=year selected)=year
-                                else
-                                    option(value=year)=year
-                    // input price
-                    div
-                        label(for="price_usd") Price USD 
-                        input#price_usd(type="number" name="priceUSD" value=vehicleInstance && vehicleInstance.priceUSD)
-                    // input max speed
-                    div
-                        label(for="max_speed_kmh") Max speed km/h 
-                        input#max_speed_kmh-speed(type="number" name="max_speed_kmh" value=vehicleInstance && vehicleInstance.max_speed_kmh)
-                    // input max range
-                    div
-                        label(for="max_range_km") Max range km 
-                        input#max_range_km(type="number" name="max_range_km" value=vehicleInstance && vehicleInstance.max_range_km)
-                    // input battery_kwh
-                    div
-                        label(for="battery_kwh") Battery capacity kw/h 
-                        input#battery_kwh(type="number" name="battery_kwh" value=vehicleInstance && vehicleInstance.battery_kwh)
+                    input#vehicle(type="hidden" name="vehicle" value=vehicleInstance && vehicleInstance.vehicle._id)
+                    .mdc-select.vehicle-select#select_vehicle
+                        .mdc-select__anchor.select-width
+                            i.mdc-select__dropdown-icon
+                            .mdc-select__selected-text Select Vehicle
+                            .mdc-line-ripple
+                        .mdc-select__menu.mdc-menu.mdc-menu-surface.select-width
+                            ul.mdc-list
+                                for vehicle in vehicles
+                                    if (vehicleInstance && vehicleInstance.vehicle._id.toString() === vehicle._id.toString())
+                                        li.mdc-list-item.mdc-list-item--selected(data-value=vehicle._id)=`${vehicle.brand} ${vehicle.model}`
+                                    else
+                                        li.mdc-list-item(data-value=vehicle._id)=`${vehicle.brand} ${vehicle.model}`
+                    // select year
+                    input#year_num(type="hidden" name="year_num", value=vehicleInstance && new Date(vehicleInstance.year).getFullYear())
+                    .mdc-select#select_year
+                        .mdc-select__anchor.select-width
+                            i.mdc-select__dropdown-icon
+                            .mdc-select__selected-text Select Year
+                            .mdc-line-ripple
+                        .mdc-select__menu.mdc-menu.mdc-menu-surface.select-width
+                            ul.mdc-list
+                                for year in years
+                                    if (vehicleInstance && new Date(vehicleInstance.year).getFullYear() === year)
+                                        li.mdc-list-item.mdc-list-item--selected(data-value=year)=year
+                                    else
+                                        li.mdc-list-item(data-value=year)=year
                     // select condition
-                    div
-                        label(for="condition") Condition 
-                        select#condition(name="condition")
-                            for conditionType in conditionTypes
-                                if (vehicleInstance && vehicleInstance.condition.toString() === conditionType.toString())
-                                    option(value=conditionType selected)=conditionType
-                                else
-                                    option(value=conditionType)=conditionType
-
-                    div
+                    input#condition(type="hidden" name="condition", value=vehicleInstance && vehicleInstance.condition)
+                    .mdc-select#select_condition
+                        .mdc-select__anchor.select-width
+                            i.mdc-select__dropdown-icon
+                            .mdc-select__selected-text Select Condition 
+                            .mdc-line-ripple
+                        .mdc-select__menu.mdc-menu.mdc-menu-surface.select-width
+                            ul.mdc-list
+                                for conditionType in conditionTypes
+                                    if (vehicleInstance && vehicleInstance.condition.toString() === conditionType.toString())
+                                        li.mdc-list-item.mdc-list-item--selected(data-value=conditionType)=conditionType
+                                    else
+                                        li.mdc-list-item(data-value=conditionType)=conditionType
+                    // input price
+                    .mdc-text-field#price.input-width-full
+                        input#price_usd.mdc-text-field__input(type="number" name="priceUSD" value=vehicleInstance && vehicleInstance.priceUSD)
+                        label.mdc-floating-label(for="price_usd") Price USD 
+                        .mdc-line-ripple
+                    // input max speed
+                    .mdc-text-field#max_speed.input-width-full
+                        input#max_speed_kmh.mdc-text-field__input(type="number" name="max_speed_kmh" value=vehicleInstance && vehicleInstance.max_speed_kmh)
+                        label.mdc-floating-label(for="max_speed_kmh") Max speed km/h 
+                        .mdc-line-ripple
+                    // input max range
+                    .mdc-text-field#max_range.input-width-full
+                        input#max_range_km.mdc-text-field__input(type="number" name="max_range_km" value=vehicleInstance && vehicleInstance.max_range_km)
+                        label.mdc-floating-label(for="max_range_km") Max range km 
+                        .mdc-line-ripple
+                    // input battery_kwh
+                    .mdc-text-field#battery.input-width-full
+                        input#battery_kwh.mdc-text-field__input(type="number" name="battery_kwh" value=vehicleInstance && vehicleInstance.battery_kwh)
+                        label.mdc-floating-label(for="battery_kwh") Battery capacity kw/h 
+                        .mdc-line-ripple
+                    .submit-btn
                         button.mdc-button.mdc-button--raised(type="submit") Submit
-                // Errors view
+        // Errors view
+        .mdc-layout-grid__inner
+            .mdc-layout-grid__cell
                 if errors
-                    h3 Errors
-                    div
+                    ul.mdc-list
                         for error in errors
-                            p=error.msg
+                            li.mdc-list-item
+                            span.mdc-list-item__text=`${error.param} ${error.msg}`
+block scripts
+    script(src="/javascripts/vehicleInstanceForm.js")
 

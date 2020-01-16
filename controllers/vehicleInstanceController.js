@@ -71,7 +71,7 @@ function generateYears(startYear) {
     const startDate = new Date();
     startDate.setFullYear(1990);
     const currentDate = new Date();
-    while (startDate.getFullYear() !== currentDate.getFullYear()) {
+    while (startDate.getFullYear() <= currentDate.getFullYear()) {
         years.push(startDate.getFullYear());
         startDate.setFullYear(startDate.getFullYear() + 1);
     }

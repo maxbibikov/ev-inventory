@@ -1,15 +1,17 @@
 extends layout
 
 block content
-    div.header-text
-        h1
-            i.material-icons.md-36.blue battery_charging_full
-            | !{title}
+    .mdc-layout-grid
+        .mdc-layout-grid__inner
+            .mdc-layout-grid__cell.mdc-layout-grid__cell--span-12
+                h1
+                    i.material-icons.md-36.blue battery_charging_full
+                    | !{title}
 
-    div.mdc-list
-        a(href="/inventory/categories").mdc-list-item
-            span.mdc-list-item-text #[strong Categories:&nbsp]!{data.categoryCount}
-        a(href="/inventory/vehicles").mdc-list-item
-            span.mdc-list-item-text #[strong Vehicles:&nbsp]!{data.vehicleCount}
-        a(href="/inventory/vehicle-instances").mdc-list-item
-            span.mdc-list-item-text #[strong Vehicle Instances:&nbsp]!{data.vehicleInstanceCount}
+                .mdc-list
+                    a(href="/inventory/categories").mdc-list-item
+                        span.mdc-list-item-text #[strong Categories:&nbsp]!{data.categoryCount}
+                    a(href="/inventory/vehicles").mdc-list-item
+                        span.mdc-list-item-text #[strong Vehicles:&nbsp]!{data.vehicleCount}
+                    a(href="/inventory/vehicle-instances").mdc-list-item
+                        span.mdc-list-item-text #[strong Vehicle Instances:&nbsp]!{data.vehicleInstanceCount}

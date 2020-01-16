@@ -12,6 +12,11 @@ body {
     height: 100%;
 }
 
+/* CATEGORY VIEW */
+.submit-btn-container {
+    margin-top: 1em;
+}
+
 .material-icons {
     font-family: 'Material Icons';
     font-weight: normal;
@@ -93,20 +98,36 @@ body {
     width: 100%;
 }
 
-.vehicle-controls__container button {
-    margin: 0.5em 1em 0.5em 0;
+/* VEHICLE VIEW */
+.vehicle-controls__container button:first-child {
+    margin-right: 1em;
 }
 
-.vehicle-instance-controls {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 3em;
+/* vehicle instance card */
+
+.vehicle-instance-card__primary {
+    padding: 16px;
 }
 
-.vehicle-instance-controls__btn:first-child {
+.vehicle-photo {
+    margin-bottom: 2em;
+}
+
+.select-width {
+    width: 100%;
+    margin-bottom: 2em;
+}
+
+.input-width-full {
+    width: 100%;
+    margin-bottom: 2em;
+}
+
+/* CATEGORY VIEW */
+.category__delete-btn {
     margin-bottom: 1em;
 }
 
-.admin-pass {
-    margin-bottom: 0.5em;
+.category__update-btn {
+    margin-bottom: 2em;
 }
