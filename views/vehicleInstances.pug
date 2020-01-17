@@ -3,13 +3,23 @@ extends layout
 block content
     .mdc-layout-grid
         .mdc-layout-grid__inner
-            .mdc-layout-grid__cell
+            .mdc-layout-grid__cell.mdc-layout-grid__cell--span-6
                 h1
                     i.material-icons.md-36.blue directions_car
                     | &nbsp#{title}
                 form(action="/inventory/vehicle-instances/create" method="get")
                     button.mdc-button.mdc-button--raised(type="submit") New Instance
-                div.mdc-list
-                    for vehicleInstance in vehicleInstances
-                        a(href=vehicleInstance.url).mdc-list-item
-                            span.mdc-list-item-text #[strong !{vehicleInstance.vehicle.brand} !{vehicleInstance.vehicle.model}] #{new Date(vehicleInstance.year).getFullYear()} #{vehicleInstance.priceUSD}$
+        .mdc-layout-grid__inner
+            for vehicleInstance in vehicleInstances
+                .mdc-layout-grid__cell.mdc-layout-grid__cell--span-4
+                    .mdc-card.vehicle-instance-list-card
+                        a.mdc-card__primary-action.vehicle-instance-list-card__primary-action(tabindex="0" href=vehicleInstance.url)
+                            .mdc-card__media.mdc-card__media--square(style=vehicleInstance.photo_url && `background-image: url("${vehicleInstance.photo_url}")`)
+                            .vehicle-instance-list-card__primary
+                                h2.mdc-typography.mdc-typography--headline6=`${vehicleInstance.vehicle.brand} ${vehicleInstance.vehicle.model}`
+                                .mdc-typography.mdc-typography--subtitle1='Price: '
+                                    strong=`${vehicleInstance.priceUSD}$`
+                                .mdc-typography.mdc-typography--subtitle1='Year: '
+                                    strong=`${new Date(vehicleInstance.year).getFullYear()}`
+block scripts
+    script(src="/javascripts/vehicleInstances.js")

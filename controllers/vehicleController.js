@@ -6,6 +6,8 @@ const Vehicle = require('../models/vehicle');
 const VehicleInstance = require('../models/vehicle-instance');
 const Category = require('../models/category');
 
+const ADMIN_PASS = 'admin';
+
 exports.vehicle_list = (req, res, next) => {
     Vehicle.find({}).exec((err, vehicles) => {
         if (err) {
@@ -99,7 +101,7 @@ exports.vehicle_create_post = [
                 return res.render('vehicleForm', {
                     title: 'Create Vehicle',
                     vehicle: newVehicle,
-                    errors: errors.array(),
+                    errors: errors.array({ onlyFirstError: true }),
                     categories
                 });
             });
@@ -142,6 +144,11 @@ exports.vehicle_update_get = (req, res, next) => {
 };
 
 exports.vehicle_update_post = [
+    body('admin_pass', 'Admin password is not valid')
+        .exists()
+        .isString()
+        .notEmpty()
+        .matches(ADMIN_PASS),
     body('brand', 'Brand is not valid')
         .exists()
         .isString()
@@ -154,7 +161,7 @@ exports.vehicle_update_post = [
         .exists()
         .isString()
         .notEmpty(),
-    body('description', 'Description is not valid').isLength({ max: 200 }),
+    body('description', 'Description is not valid').isLength({ max: 300 }),
     sanitizeBody(['brand', 'model', 'categoryID', 'description'])
         .escape()
         .trim(),
@@ -174,10 +181,10 @@ exports.vehicle_update_post = [
                 .exec()
                 .then(categories => {
                     return res.render('vehicleForm', {
-                        title: 'Update Vehicle',
+                        title: `Update Vehicle`,
                         vehicle,
                         categories,
-                        errors: errors.array()
+                        errors: errors.array({ onlyFirstError: true })
                     });
                 })
                 .catch(err => next(err));
@@ -192,43 +199,61 @@ exports.vehicle_update_post = [
     }
 ];
 
-exports.vehicle_delete_post = (req, res, next) => {
-    const vehicleID = req.params.id;
+exports.vehicle_delete_post = [
+    body('admin_pass', 'Admin password is not valid')
+        .notEmpty()
+        .exists()
+        .matches(ADMIN_PASS),
+    sanitizeBody('admin_pass')
+        .escape()
+        .trim(),
+    (req, res, next) => {
+        const vehicleID = req.params.id;
+        const errors = validationResult(req);
 
-    async.parallel(
-        {
-            vehicle: callback => Vehicle.findById(vehicleID).exec(callback),
-            vehicleInstances: callback =>
-                VehicleInstance.find({ vehicle: vehicleID }).exec(callback)
-        },
-        (err, { vehicle, vehicleInstances }) => {
-            if (err) {
-                return next(err);
-            }
-
-            if (!vehicle) {
-                const notFound = new Error(
-                    `Vehicle with id:${vehicleID} not found`
-                );
-                notFound.status = 404;
-                return notFound;
-            }
-
-            if (vehicleInstances.length > 0) {
-                const foundInstances = new Error(
-                    'Remove all vehicle instances first'
-                );
-
-                return next(foundInstances);
-            }
-
-            return Vehicle.findByIdAndRemove(vehicle._id).exec(err => {
+        async.parallel(
+            {
+                vehicle: callback => Vehicle.findById(vehicleID).exec(callback),
+                vehicleInstances: callback =>
+                    VehicleInstance.find({ vehicle: vehicleID }).exec(callback)
+            },
+            (err, { vehicle, vehicleInstances }) => {
+                if (!errors.isEmpty()) {
+                    return res.render('vehicle', {
+                        title: `${vehicle.brand} ${vehicle.model}`,
+                        vehicle,
+                        vehicleInstances,
+                        errors: errors.array({ onlyFirstError: true })
+                    });
+                }
                 if (err) {
                     return next(err);
                 }
 
-                return res.redirect('/inventory/vehicles');
-            });
-        }
-    );
-};
+                if (!vehicle) {
+                    const notFound = new Error(
+                        `Vehicle with id:${vehicleID} not found`
+                    );
+                    notFound.status = 404;
+                    return notFound;
+                }
+
+                if (vehicleInstances.length > 0) {
+                    const foundInstances = new Error(
+                        'Remove all vehicle instances first'
+                    );
+
+                    return next(foundInstances);
+                }
+
+                return Vehicle.findByIdAndRemove(vehicle._id).exec(err => {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    return res.redirect('/inventory/vehicles');
+                });
+            }
+        );
+    }
+];

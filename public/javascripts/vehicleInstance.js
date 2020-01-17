@@ -10,3 +10,6 @@ deleteConfirmDialogMDC.listen('MDCDialog:closing', event => {
     if (event.detail.action === 'delete') {
     }
 });
+
+const adminPassEl = document.querySelector('.admin-pass');
+const adiminPassMDCTextField = new mdc.textField.MDCTextField(adminPassEl);

@@ -34,6 +34,10 @@ const inputMaxRange = new mdc.textField.MDCTextField(
 const inputBattery = new mdc.textField.MDCTextField(
     document.getElementById('battery')
 );
+// Admin password input
+const inputAdminPass = new mdc.textField.MDCTextField(
+    document.querySelector('.admin-pass-text-field')
+);
 
 // Condition select
 const selectCondition = new mdc.select.MDCSelect(

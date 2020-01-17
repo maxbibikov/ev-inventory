@@ -1,6 +1,6 @@
 html,
 body {
-    font: 14px 'Lucida Grande', Helvetica, Arial, sans-serif;
+    font-family: 'Cabin', 'Lucida Grande', Helvetica, Arial, sans-serif;
     margin: 0;
     display: flex;
     height: 100vh;
@@ -10,11 +10,6 @@ body {
 .main-content {
     margin-top: 56px;
     height: 100%;
-}
-
-/* CATEGORY VIEW */
-.submit-btn-container {
-    margin-top: 1em;
 }
 
 .material-icons {
@@ -85,12 +80,13 @@ body {
     margin-top: 2em;
     text-align: center;
 }
-
+/* VEHICLE FORM VIEW */
 .brand,
 .model,
 .category,
 .submit-btn,
-.description {
+.description,
+.admin-pass-text-field {
     margin-bottom: 2em;
     width: 100%;
 }
@@ -125,9 +121,30 @@ body {
 
 /* CATEGORY VIEW */
 .category__delete-btn {
-    margin-bottom: 1em;
+    margin-bottom: 2em;
 }
 
 .category__update-btn {
-    margin-bottom: 2em;
+    margin-bottom: 1em;
+}
+
+.submit-btn-container {
+    margin-top: 1em;
+    display: flex;
+    justify-content: center;
+}
+
+/* CATEGORY FORM VIEW */
+.category-name-text-field {
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+/* VEHICLE INSTANCES VIEW */
+.vehicle-instance-list-card {
+    margin-top: 1em;
+}
+
+.vehicle-instance-list-card__primary {
+    padding: 1em;
 }

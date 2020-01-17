@@ -5,6 +5,8 @@ const { body, sanitizeBody, validationResult } = require('express-validator');
 const Category = require('../models/category');
 const Vehicle = require('../models/vehicle');
 
+const ADMIN_PASS = 'admin';
+
 exports.category_list = (req, res, next) => {
     Category.find({}).exec((err, categories) => {
         if (err) {
@@ -69,7 +71,7 @@ exports.category_create_post = [
         if (!errors.isEmpty()) {
             return res.render('categoryForm', {
                 title: 'Create Category',
-                errors: errors.array(),
+                errors: errors.array({ onlyFirstError: true }),
                 category: newCategory
             });
         }
@@ -107,10 +109,15 @@ exports.category_update_get = (req, res, next) => {
 };
 
 exports.category_update_post = [
-    body('category_name')
+    body('category_name', 'Category name is not valid')
         .notEmpty()
-        .isLength({ min: 3, max: 15 }),
-    sanitizeBody('category_name')
+        .isLength({ min: 3, max: 15 })
+        .isString(),
+    body('admin_pass', 'Admin password is not valid')
+        .notEmpty()
+        .exists()
+        .matches(ADMIN_PASS),
+    sanitizeBody(['category_name', 'admin_pass'])
         .trim()
         .escape(),
     (req, res, next) => {
@@ -121,10 +128,10 @@ exports.category_update_post = [
         });
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.redirect('categoryForm', {
+            return res.render('categoryForm', {
                 title: 'Update category',
                 category,
-                errors: errors.array()
+                errors: errors.array({ onlyFirstError: true })
             });
         }
 
@@ -140,39 +147,57 @@ exports.category_update_post = [
     }
 ];
 
-exports.category_delete_post = (req, res, next) => {
-    const categoryID = req.params.id;
-
-    async.parallel(
-        {
-            category: callback => Category.findById(categoryID).exec(callback),
-            categoryVehicles: callback =>
-                Vehicle.find({ category: categoryID }).exec(callback)
-        },
-        (err, { category, categoryVehicles }) => {
-            if (err) {
-                return next(err);
-            }
-
-            if (!category) {
-                return redirect('/inventory/categories');
-            }
-
-            if (categoryVehicles.length > 0) {
-                const notEmpty = new Error(
-                    'Category still has vehicles. Delete them first'
-                );
-                notEmpty.status = 404;
-                return next(notEmpty);
-            }
-
-            return Category.findByIdAndRemove(categoryID).exec(err => {
+exports.category_delete_post = [
+    body('admin_pass', 'Admin password is not valid')
+        .notEmpty()
+        .exists()
+        .matches(ADMIN_PASS),
+    sanitizeBody('admin_pass')
+        .escape()
+        .trim(),
+    (req, res, next) => {
+        const categoryID = req.params.id;
+        const errors = validationResult(req);
+        async.parallel(
+            {
+                category: callback =>
+                    Category.findById(categoryID).exec(callback),
+                categoryVehicles: callback =>
+                    Vehicle.find({ category: categoryID }).exec(callback)
+            },
+            (err, { category, categoryVehicles }) => {
+                if (!errors.isEmpty()) {
+                    return res.render('category', {
+                        title: category.name,
+                        category,
+                        categoryVehicles,
+                        errors: errors.array({ onlyFirstError: true })
+                    });
+                }
                 if (err) {
                     return next(err);
                 }
 
-                return res.redirect('/inventory/categories');
-            });
-        }
-    );
-};
+                if (!category) {
+                    return redirect('/inventory/categories');
+                }
+
+                if (categoryVehicles.length > 0) {
+                    const notEmpty = new Error(
+                        'Category still has vehicles. Delete them first'
+                    );
+                    notEmpty.status = 404;
+                    return next(notEmpty);
+                }
+
+                return Category.findByIdAndRemove(categoryID).exec(err => {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    return res.redirect('/inventory/categories');
+                });
+            }
+        );
+    }
+];

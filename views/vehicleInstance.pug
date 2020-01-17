@@ -2,6 +2,14 @@ extends layout
 
 block content
     .mdc-layout-grid
+        if errors && errors.length > 0
+            .mdc-layout-grid__inner
+            .mdc-layout-grid__cell.mdc-layout-grid__cell--span-12
+                h3 !Error
+                ul.mdc-list
+                    for error in errors
+                        li.mdc-list-item
+                            span.mdc-list-item-text=error.msg
         .mdc-layout-grid__inner
             .mdc-layout-grid__cell.mdc-layout-grid__cell--span-12
                 .mdc-card.vehicle-instance-card
@@ -28,24 +36,27 @@ block content
                         .mdc-card__action-icons
                             button#delete_vehicle_instance.material-icons.mdc-icon-button.mdc-card__action.mdc-card__action--icon--unbounded(aria-pressed="false" aria-label="Delete" title="Delete") delete
                 //- confirm dialog
-                .mdc-dialog.delete-confirm-dialog(role="alertdialog" aria-modal="true" aria-labelledby="my-dialog-title" aria-describedby="my-dialog-content")
-                    .mdc-dialog__container
-                        .mdc-dialog__surface
-                            h2#delete-dialog-title.mdc-dialog__title Delete !{vehicleInstance.vehicle.brand}
-                            .mdc-dialog__content
-                                p Are you sure you want to delete #[strong #{vehicleInstance.vehicle.brand} #{vehicleInstance.vehicle.model} #{new Date(vehicleInstance.year).getFullYear()}]?
-                            footer.mdc-dialog__actions
-                                form(action=vehicleInstance._id +'/delete' method="post")
+                form(action=vehicleInstance._id +'/delete' method="post")
+                    .mdc-dialog.delete-confirm-dialog(role="alertdialog" aria-modal="true" aria-labelledby="my-dialog-title" aria-describedby="my-dialog-content")
+                        .mdc-dialog__container
+                            .mdc-dialog__surface
+                                h2#delete-dialog-title.mdc-dialog__title Delete !{vehicleInstance.vehicle.brand}
+                                .mdc-dialog__content
+                                    p Are you sure you want to delete #[strong #{vehicleInstance.vehicle.brand} #{vehicleInstance.vehicle.model} #{new Date(vehicleInstance.year).getFullYear()}]?
+                                    .mdc-text-field.mdc-text-field--outlined.admin-pass
+                                        input.mdc-text-field__input#admin_pass(type="password" name="admin_pass")
+                                        .mdc-notched-outline
+                                            .mdc-notched-outline__leading
+                                            .mdc-notched-outline__notch
+                                                label.mdc-floating-label Enter Admin Password
+                                            .mdc-notched-outline__trailing
+
+                                footer.mdc-dialog__actions
                                     button.mdc-button.mdc-dialog__button(type="button" data-mdc-dialog-action="close")
                                         span.mdc-button__label Cancel
                                     button.mdc-button.mdc-button--raised.mdc-dialog__button(type="submit" data-mdc-dialog-action="delete")
                                         span.mdc-button__label Delete
-                    .mdc-dialog__scrim
-                if errors && errors.length > 0
-                    h3 !Error
-                    ul.mdc-list
-                        for error in errors
-                            li.mdc-list-item
-                                span.mdc-list-item-text=error.msg
+                        .mdc-dialog__scrim
+
 block scripts
     script(src="/javascripts/vehicleInstance.js")

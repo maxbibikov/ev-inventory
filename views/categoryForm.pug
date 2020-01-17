@@ -3,23 +3,28 @@ extends layout
 block content
     .mdc-layout-grid
         .mdc-layout-grid__inner
-            .mdc-layout-grid__cell
-                h1=title
-            .mdc-layout-grid__cell
-            .mdc-layout-grid__cell
-        .mdc-layout-grid__inner
-            .mdc-layout-grid__cell
+            .mdc-layout-grid__cell.mdc-layout-grid__cell--span-4
+                h2=title
+                // Errors view
+                if errors
+                    ul.mdc-list
+                        for error in errors
+                            li.mdc-list-item
+                                h3.mdc-list-item__text(style="color: salmon")=`⚠️ ${error.msg}`
                 form(method="post" action="")
-                    .mdc-text-field.mdc-text-field--outlined#category_name
-                        input.mdc-text-field__input(name="category_name" type="text" placeholder="Enter category name" value=category && category.name aria-label="Enter category name" required minlength=3 maxlength=15)
+                    .mdc-text-field.category-name-text-field
+                        input#category_name.mdc-text-field__input(name="category_name" type="text" value=category && category.name aria-label="Enter category name" required minlength=3 maxlength=15)
                         label.mdc-floating-label(for="category-name") Category name
                         .mdc-line-ripple
+                    if category
+                        .mdc-text-field.admin-pass-text-field
+                            input#admin_pass.mdc-text-field__input(name="admin_pass" type="password" aria-label="Enter category name" required)
+                            label.mdc-floating-label(for="category-name") Enter Admin Password
+                            .mdc-line-ripple
                     .submit-btn-container
                         button.mdc-button.mdc-button--raised(type="submit")
-                            div.mdc-button__ripple
+                            span.mdc-button__ripple
                             i.material-icons.mdc-button__icon(aria-hidden="true") check
-                            div.mdc-button__label(type="submit") SUBMIT
-            .mdc-layout-grid__cell
-            .mdc-layout-grid__cell
+                            span.mdc-button__label(type="submit") SUBMIT
 block scripts
     script(src="/javascripts/categoryForm.js")

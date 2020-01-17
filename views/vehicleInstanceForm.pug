@@ -5,11 +5,20 @@ block content
         .mdc-layout-grid__inner
             .mdc-layout-grid__cell.mdc-layout-grid__cell--span-4
                 h2=title
+                // Errors view
+                if errors
+                    ul.mdc-list
+                        for error in errors
+                            li.mdc-list-item
+                                h3.mdc-list-item__text(style="color: salmon")=`⚠️ ${error.msg}`
                 form(action="" method="post" enctype="multipart/form-data")
                     // vehicle photo
                     .vehicle-photo
                         label(for="vehicle_photo") Choose a vehicle photo: 
-                        input#vehicle_photo(type="file" name="vehicle_photo" accept="image/png image/jpeg")
+                        if vehicleInstance
+                            input#vehicle_photo(type="file" name="vehicle_photo" accept="image/png image/jpeg")
+                        else
+                            input#vehicle_photo(type="file" name="vehicle_photo" accept="image/png image/jpeg" required)
                         input(type="hidden" name="photo", value=vehicleInstance && vehicleInstance.photo)
                     // select vehicle
                     input#vehicle(type="hidden" name="vehicle" value=vehicleInstance && vehicleInstance.vehicle._id)
@@ -73,16 +82,14 @@ block content
                         input#battery_kwh.mdc-text-field__input(type="number" name="battery_kwh" value=vehicleInstance && vehicleInstance.battery_kwh)
                         label.mdc-floating-label(for="battery_kwh") Battery capacity kw/h 
                         .mdc-line-ripple
+                    // input admin pass
+                    .mdc-text-field.input-width-full.admin-pass-text-field
+                        input#admin_pass.mdc-text-field__input(type="password" name="admin_pass" required)
+                        label.mdc-floating-label(for="admin_pass") Enter Admin Pass
+                        .mdc-line-ripple
                     .submit-btn
                         button.mdc-button.mdc-button--raised(type="submit") Submit
-        // Errors view
-        .mdc-layout-grid__inner
-            .mdc-layout-grid__cell
-                if errors
-                    ul.mdc-list
-                        for error in errors
-                            li.mdc-list-item
-                            span.mdc-list-item__text=`${error.param} ${error.msg}`
+
 block scripts
     script(src="/javascripts/vehicleInstanceForm.js")
 

@@ -32,53 +32,6 @@ function selectCurrentRoute() {
 }
 selectCurrentRoute();
 
-const brandElement = document.querySelector('.brand');
-if (brandElement) {
-    const brand = new mdc.textField.MDCTextField(brandElement);
-
-    const model = new mdc.textField.MDCTextField(
-        document.querySelector('.model')
-    );
-    const description = new mdc.textField.MDCTextField(
-        document.querySelector('.description')
-    );
-    const selectCategory = new mdc.select.MDCSelect(
-        document.querySelector('.category')
-    );
-
-    selectCategory.listen('MDCSelect:change', () => {
-        const categoryID = document.querySelector('#categoryID');
-        categoryID.value = selectCategory.value;
-    });
-}
-
-const vehicleControllsUpdate = document.querySelector(
-    '.vehicle-controls__update'
-);
-
-if (vehicleControllsUpdate) {
-    const vehicleUpdateButton = new mdc.ripple.MDCRipple(
-        vehicleControllsUpdate
-    );
-    const vehicleDeleteButton = new mdc.ripple.MDCRipple(
-        document.querySelector('.vehicle-controls__delete')
-    );
-    vehicleDeleteButton.listen('click', () => {
-        deleteConfirmDialogMDC.open();
-    });
-    const deleteConfirmDialog = document.querySelector(
-        '.delete-confirm-dialog'
-    );
-    const deleteConfirmDialogMDC = new mdc.dialog.MDCDialog(
-        deleteConfirmDialog
-    );
-
-    deleteConfirmDialogMDC.listen('MDCDialog:closing', event => {
-        if (event.detail.action === 'delete') {
-        }
-    });
-}
-
 // DRAWER MENU
 const drawerElement = document.querySelector('.mdc-drawer');
 const drawer = new mdc.drawer.MDCDrawer(drawerElement);

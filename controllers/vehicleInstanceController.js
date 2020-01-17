@@ -12,6 +12,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const fs = require('fs');
 const { body, sanitizeBody, validationResult } = require('express-validator');
+const ADMIN_PASS = 'admin';
 
 // Models
 const VehicleInstance = require('../models/vehicle-instance');
@@ -185,7 +186,7 @@ exports.vehicleInstance_create_post = [
                     }
                     return res.render('vehicleInstanceForm', {
                         title: 'New Vehicle Instance',
-                        errors: errors.array(),
+                        errors:errors.array({ onlyFirstError: true }),
                         vehicleInstance,
                         years,
                         conditionTypes,
@@ -254,7 +255,7 @@ exports.vehicleInstance_update_post = [
     body('battery_kwh', 'Battery capacity is not valid')
         .notEmpty()
         .exists()
-        .isInt(),
+        .isNumeric(),
     body('year_num', 'Year is not valid')
         .notEmpty()
         .exists()
@@ -268,6 +269,11 @@ exports.vehicleInstance_update_post = [
         .notEmpty()
         .exists()
         .isString(),
+    body('admin_pass', 'Admin password is not valid')
+        .notEmpty()
+        .exists()
+        .isString()
+        .matches(ADMIN_PASS),
     sanitizeBody([
         'vehicle',
         'max_speed_kmh',
@@ -275,7 +281,8 @@ exports.vehicleInstance_update_post = [
         'battery_kwh',
         'year_num',
         'priceUSD',
-        'condition'
+        'condition',
+        'admin_pass'
     ])
         .trim()
         .escape(),
@@ -289,7 +296,8 @@ exports.vehicleInstance_update_post = [
             year_num,
             priceUSD,
             condition,
-            photo
+            photo,
+            admin_pass
         } = req.body;
         const { file } = req;
         const vehicleInstance = new VehicleInstance({
@@ -314,7 +322,7 @@ exports.vehicleInstance_update_post = [
                     return res.render('vehicleInstanceForm', {
                         title: 'Update Vehicle Instance',
                         vehicleInstance,
-                        errors: errors.array(),
+                        errors:errors.array({ onlyFirstError: true }),
                         vehicles,
                         years,
                         conditionTypes
@@ -347,7 +355,7 @@ exports.vehicleInstance_delete_post = [
     body('admin_pass', 'Admin password not valid')
         .notEmpty()
         .exists()
-        .matches('admin'),
+        .matches(ADMIN_PASS),
     sanitizeBody('admin_pass')
         .escape()
         .trim(),
@@ -363,7 +371,7 @@ exports.vehicleInstance_delete_post = [
                     return res.render('vehicleInstance', {
                         title: `${vehicleInstance.vehicle.brand} ${vehicleInstance.vehicle.model}`,
                         vehicleInstance,
-                        errors: errors.array()
+                        errors:errors.array({ onlyFirstError: true })
                     });
                 });
         }

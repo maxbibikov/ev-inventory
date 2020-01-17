@@ -4,7 +4,17 @@ block content
     .mdc-layout-grid
         .mdc-layout-grid__inner
             .mdc-layout-grid__cell.mdc-layout-grid__cell--span-4
-                h2=title
+                if vehicle
+                    h2.mdc-typography--headline6 Update: 
+                        strong= `${vehicle.brand} ${vehicle.model}`
+                else
+                    h2.mdc-typography--headline6= title
+                //- Errors list
+                if errors
+                    ul.mdc-list
+                        for error in errors
+                            li.mdc-list-item
+                                span.mdc-list-item__text=`⚠️ ${error.msg}`
                 form(action="" method="post")
                     .mdc-text-field.brand
                         input.mdc-text-field__input#brand(type="text" name="brand" value=vehicle && vehicle.brand required)
@@ -39,13 +49,12 @@ block content
                             .mdc-notched-outline__notch
                                 label.mdc-floating-label(for="textarea") Description
                             .mdc-notched-outline__trailing
+                    if vehicle
+                        .mdc-text-field.admin-pass-text-field
+                            input.mdc-text-field__input#admin_pass(type="password" name="admin_pass" required)
+                            label.mdc-floating-label(for="admin_pass") Enter Admin Password
+                            .mdc-line-ripple
                     .submit-btn
                         button.mdc-button.mdc-button--raised(type="submit") SUBMIT
-        .mdc-layout-grid__inner
-            .mdc-layout-grid__cell
-                if errors
-                    ul.mdc-list
-                        for error in errors
-                            li.mdc-list-item
-                                span.mdc-list-item__text=`${error.param} ${error.msg}`
-
+block scripts
+    script(src="/javascripts/vehicleForm.js")
