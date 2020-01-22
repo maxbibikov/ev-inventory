@@ -35,7 +35,7 @@ block content
                 else
                     h3 !Out of stock
                 //- confirm delete dialog
-                form(action=vehicle._id +'/delete' method="post")
+                form(action=vehicle.url +'/delete' method="post")
                     .mdc-dialog.delete-confirm-dialog(role="alertdialog" aria-modal="true" aria-labelledby="my-dialog-title" aria-describedby="my-dialog-content")
                         .mdc-dialog__container
                             .mdc-dialog__surface

@@ -2,16 +2,14 @@ extends layout
 
 block content
     .mdc-layout-grid
-        if errors && errors.length > 0
-            .mdc-layout-grid__inner
-            .mdc-layout-grid__cell.mdc-layout-grid__cell--span-12
-                h3 !Error
-                ul.mdc-list
-                    for error in errors
-                        li.mdc-list-item
-                            span.mdc-list-item-text=error.msg
         .mdc-layout-grid__inner
             .mdc-layout-grid__cell.mdc-layout-grid__cell--span-12
+                // Errors view
+                if errors
+                    ul.mdc-list
+                        for error in errors
+                            li.mdc-list-item
+                                h3.mdc-list-item__text(style="color: salmon")=`⚠️ ${error.msg}`
                 .mdc-card.vehicle-instance-card
                     .vehicle-instance-card__primary
                         h2.mdc-typography.mdc-typography--headline6 #{title} #{new Date(vehicleInstance.year).getFullYear()}
@@ -36,7 +34,7 @@ block content
                         .mdc-card__action-icons
                             button#delete_vehicle_instance.material-icons.mdc-icon-button.mdc-card__action.mdc-card__action--icon--unbounded(aria-pressed="false" aria-label="Delete" title="Delete") delete
                 //- confirm dialog
-                form(action=vehicleInstance._id +'/delete' method="post")
+                form(action=vehicleInstance.url +'/delete' method="post")
                     .mdc-dialog.delete-confirm-dialog(role="alertdialog" aria-modal="true" aria-labelledby="my-dialog-title" aria-describedby="my-dialog-content")
                         .mdc-dialog__container
                             .mdc-dialog__surface

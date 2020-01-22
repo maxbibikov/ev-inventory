@@ -27,7 +27,7 @@ block content
                             a(href=categoryVehicle.url).mdc-list-item
                                 span.mdc-list-item-text #[strong !{categoryVehicle.brand} !{categoryVehicle.model}]
                 //- confirm delete dialog
-                form(action=category._id +'/delete' method="post")
+                form(action=category.url +'/delete' method="post")
                     .mdc-dialog.delete-confirm-dialog(role="alertdialog" aria-modal="true" aria-labelledby="my-dialog-title" aria-describedby="my-dialog-content")
                         .mdc-dialog__container
                             .mdc-dialog__surface

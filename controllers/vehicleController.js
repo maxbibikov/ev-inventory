@@ -5,8 +5,7 @@ const { body, sanitizeBody, validationResult } = require('express-validator');
 const Vehicle = require('../models/vehicle');
 const VehicleInstance = require('../models/vehicle-instance');
 const Category = require('../models/category');
-
-const ADMIN_PASS = 'admin';
+const User = require('../models/user');
 
 exports.vehicle_list = (req, res, next) => {
     Vehicle.find({}).exec((err, vehicles) => {
@@ -147,8 +146,7 @@ exports.vehicle_update_post = [
     body('admin_pass', 'Admin password is not valid')
         .exists()
         .isString()
-        .notEmpty()
-        .matches(ADMIN_PASS),
+        .notEmpty(),
     body('brand', 'Brand is not valid')
         .exists()
         .isString()
@@ -167,7 +165,7 @@ exports.vehicle_update_post = [
         .trim(),
     (req, res, next) => {
         const errors = validationResult(req);
-        const { brand, model, categoryID, description } = req.body;
+        const { brand, model, categoryID, description, admin_pass } = req.body;
         const vehicle = new Vehicle({
             _id: req.params.id,
             brand,
@@ -190,26 +188,55 @@ exports.vehicle_update_post = [
                 .catch(err => next(err));
         }
 
-        return Vehicle.findByIdAndUpdate(vehicle._id, vehicle)
+        return User.findOne({ username: 'admin' })
             .exec()
-            .then(updatedVehicle => {
-                return res.redirect(updatedVehicle.url);
+            .then(user => {
+                return user.comparePassword(admin_pass);
             })
-            .catch(err => next(err));
+            .then(paswordMatches => {
+                if (!paswordMatches) {
+                    return Category.find({})
+                        .exec()
+                        .then(categories => {
+                            if (!categories) {
+                                const notFoundErr = new Error(
+                                    'Categories not found'
+                                );
+                                notFoundErr.status = 404;
+
+                                return next(notFoundErr);
+                            }
+                            return res.render('vehicleForm', {
+                                title: `Update Vehicle`,
+                                vehicle,
+                                categories,
+                                errors: [{ msg: 'Admin password is not valid' }]
+                            });
+                        })
+                        .catch(err => next(err));
+                }
+
+                return Vehicle.findByIdAndUpdate(vehicle._id, vehicle)
+                    .exec()
+                    .then(updatedVehicle => {
+                        return res.redirect(updatedVehicle.url);
+                    })
+                    .catch(err => next(err));
+            });
     }
 ];
 
 exports.vehicle_delete_post = [
     body('admin_pass', 'Admin password is not valid')
         .notEmpty()
-        .exists()
-        .matches(ADMIN_PASS),
+        .exists(),
     sanitizeBody('admin_pass')
         .escape()
         .trim(),
     (req, res, next) => {
         const vehicleID = req.params.id;
         const errors = validationResult(req);
+        const { admin_pass } = req.body;
 
         async.parallel(
             {
@@ -246,13 +273,29 @@ exports.vehicle_delete_post = [
                     return next(foundInstances);
                 }
 
-                return Vehicle.findByIdAndRemove(vehicle._id).exec(err => {
-                    if (err) {
-                        return next(err);
-                    }
+                return User.findOne({ username: 'admin' })
+                    .exec()
+                    .then(user => user.comparePassword(admin_pass))
+                    .then(paswordMatches => {
+                        if (!paswordMatches) {
+                            return res.render('vehicle', {
+                                title: `${vehicle.brand} ${vehicle.model}`,
+                                vehicle,
+                                vehicleInstances,
+                                errors: [{ msg: 'Admin password is not valid' }]
+                            });
+                        }
 
-                    return res.redirect('/inventory/vehicles');
-                });
+                        return Vehicle.findOneAndRemove({
+                            _id: vehicle._id
+                        }).exec(err => {
+                            if (err) {
+                                return next(err);
+                            }
+
+                            return res.redirect('/inventory/vehicles');
+                        });
+                    });
             }
         );
     }

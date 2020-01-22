@@ -12,11 +12,11 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const fs = require('fs');
 const { body, sanitizeBody, validationResult } = require('express-validator');
-const ADMIN_PASS = 'admin';
 
 // Models
 const VehicleInstance = require('../models/vehicle-instance');
 const Vehicle = require('../models/vehicle');
+const User = require('../models/user');
 
 exports.vehicleInstance_list = (req, res, next) => {
     VehicleInstance.find({})
@@ -74,17 +74,17 @@ function generateYears(startYear) {
     startDate.setFullYear(1990);
     const currentDate = new Date();
     while (startDate.getFullYear() <= currentDate.getFullYear()) {
-        years.push(startDate.getFullYear());
+        years.unshift(startDate.getFullYear());
         startDate.setFullYear(startDate.getFullYear() + 1);
     }
 
     return years;
 }
 
-exports.vehicleInstance_create_get = (req, res, next) => {
-    const years = generateYears(1990);
-    const conditionTypes = VehicleInstance.schema.path('condition').enumValues;
+const years = generateYears(1990);
+const conditionTypes = VehicleInstance.schema.path('condition').enumValues;
 
+exports.vehicleInstance_create_get = (req, res, next) => {
     return Vehicle.find({})
         .exec()
         .then(vehicles => {
@@ -173,9 +173,6 @@ exports.vehicleInstance_create_post = [
         });
 
         if (!errors.isEmpty()) {
-            const years = generateYears(1990);
-            const conditionTypes = VehicleInstance.schema.path('condition')
-                .enumValues;
             return Vehicle.find({})
                 .exec()
                 .then(vehicles => {
@@ -186,7 +183,7 @@ exports.vehicleInstance_create_post = [
                     }
                     return res.render('vehicleInstanceForm', {
                         title: 'New Vehicle Instance',
-                        errors:errors.array({ onlyFirstError: true }),
+                        errors: errors.array({ onlyFirstError: true }),
                         vehicleInstance,
                         years,
                         conditionTypes,
@@ -222,9 +219,6 @@ exports.vehicleInstance_update_get = (req, res, next) => {
                 return next(notFoundError);
             }
 
-            const years = generateYears(1990);
-            const conditionTypes = VehicleInstance.schema.path('condition')
-                .enumValues;
             return res.render('vehicleInstanceForm', {
                 title: `${vehicleInstance.vehicle.brand} ${
                     vehicleInstance.vehicle.model
@@ -272,8 +266,7 @@ exports.vehicleInstance_update_post = [
     body('admin_pass', 'Admin password is not valid')
         .notEmpty()
         .exists()
-        .isString()
-        .matches(ADMIN_PASS),
+        .isString(),
     sanitizeBody([
         'vehicle',
         'max_speed_kmh',
@@ -313,16 +306,13 @@ exports.vehicleInstance_update_post = [
         });
 
         if (!errors.isEmpty()) {
-            const years = generateYears(1990);
-            const conditionTypes = VehicleInstance.schema.path('condition')
-                .enumValues;
             return Vehicle.find({})
                 .exec()
                 .then(vehicles => {
                     return res.render('vehicleInstanceForm', {
                         title: 'Update Vehicle Instance',
                         vehicleInstance,
-                        errors:errors.array({ onlyFirstError: true }),
+                        errors: errors.array({ onlyFirstError: true }),
                         vehicles,
                         years,
                         conditionTypes
@@ -330,57 +320,104 @@ exports.vehicleInstance_update_post = [
                 });
         }
 
-        return VehicleInstance.findByIdAndUpdate(
-            vehicleInstance._id,
-            vehicleInstance
-        )
-            .then(updatedInstance => {
-                // remove previous image file
-                if (file) {
-                    return fs.unlink(`public/images/${photo}`, err => {
-                        if (err) {
-                            console.error(err);
-                            return res.redirect(updatedInstance.url);
+        return User.findOne({ username: 'admin' })
+            .exec()
+            .then(user => user.comparePassword(admin_pass))
+            .then(passwordMatches => {
+                if (!passwordMatches) {
+                    return Vehicle.find({})
+                        .exec()
+                        .then(vehicles => {
+                            if (!vehicles) {
+                                const notFoundErr = new Error(
+                                    'Vehicles not found'
+                                );
+                                notFoundErr.status = 404;
+                                return next(notFoundErr);
+                            }
+
+                            return res.render('vehicleInstanceForm', {
+                                title: 'Update Vehicle Instance',
+                                vehicleInstance,
+                                errors: [
+                                    { msg: 'Admin password is not valid' }
+                                ],
+                                vehicles,
+                                years,
+                                conditionTypes
+                            });
+                        });
+                }
+                return VehicleInstance.findOneAndUpdate(
+                    { _id: vehicleInstance._id },
+                    vehicleInstance
+                )
+                    .then(updatedInstance => {
+                        // remove previous image file
+                        if (file) {
+                            return fs.unlink(`public/images/${photo}`, err => {
+                                if (err) {
+                                    console.error(err);
+                                    return res.redirect(updatedInstance.url);
+                                }
+                                return res.redirect(updatedInstance.url);
+                            });
                         }
                         return res.redirect(updatedInstance.url);
-                    });
-                }
-                return res.redirect(updatedInstance.url);
-            })
-            .catch(err => next(err));
+                    })
+                    .catch(err => next(err));
+            });
     }
 ];
 
 exports.vehicleInstance_delete_post = [
     body('admin_pass', 'Admin password not valid')
         .notEmpty()
-        .exists()
-        .matches(ADMIN_PASS),
+        .exists(),
     sanitizeBody('admin_pass')
         .escape()
         .trim(),
     (req, res, next) => {
         const vehicleInstanceID = req.params.id;
         const errors = validationResult(req);
+        const { admin_pass } = req.body;
 
         if (!errors.isEmpty()) {
-            return VehicleInstance.findById(vehicleInstanceID)
+            return VehicleInstance.findOne({ _id: vehicleInstanceID })
                 .populate('vehicle')
                 .exec()
                 .then(vehicleInstance => {
                     return res.render('vehicleInstance', {
                         title: `${vehicleInstance.vehicle.brand} ${vehicleInstance.vehicle.model}`,
                         vehicleInstance,
-                        errors:errors.array({ onlyFirstError: true })
+                        errors: errors.array({ onlyFirstError: true })
                     });
                 });
         }
 
-        return VehicleInstance.findByIdAndRemove(vehicleInstanceID)
+        return User.findOne({ username: 'admin' })
             .exec()
-            .then(() => {
-                return res.redirect('/inventory/vehicle-instances');
-            })
-            .catch(err => next(err));
+            .then(user => user.comparePassword(admin_pass))
+            .then(passwordMatches => {
+                if (!passwordMatches) {
+                    return VehicleInstance.findOne({ _id: vehicleInstanceID })
+                        .populate('vehicle')
+                        .exec()
+                        .then(vehicleInstance => {
+                            return res.render('vehicleInstance', {
+                                title: `${vehicleInstance.vehicle.brand} ${vehicleInstance.vehicle.model}`,
+                                vehicleInstance,
+                                errors: [{ msg: 'Admin password is not valid' }]
+                            });
+                        });
+                }
+
+                return VehicleInstance.findOneAndRemove({ _id: vehicleInstanceID })
+                    .exec()
+                    .then(() => {
+                        return res.redirect('/inventory/vehicle-instances');
+                    })
+                    .catch(err => next(err));
+            });
     }
 ];

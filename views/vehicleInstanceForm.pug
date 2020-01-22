@@ -82,11 +82,12 @@ block content
                         input#battery_kwh.mdc-text-field__input(type="number" name="battery_kwh" value=vehicleInstance && vehicleInstance.battery_kwh)
                         label.mdc-floating-label(for="battery_kwh") Battery capacity kw/h 
                         .mdc-line-ripple
-                    // input admin pass
-                    .mdc-text-field.input-width-full.admin-pass-text-field
-                        input#admin_pass.mdc-text-field__input(type="password" name="admin_pass" required)
-                        label.mdc-floating-label(for="admin_pass") Enter Admin Pass
-                        .mdc-line-ripple
+                    if vehicleInstance
+                        // input admin pass
+                        .mdc-text-field.input-width-full.admin-pass-text-field
+                            input#admin_pass.mdc-text-field__input(type="password" name="admin_pass" required)
+                            label.mdc-floating-label(for="admin_pass") Enter Admin Pass
+                            .mdc-line-ripple
                     .submit-btn
                         button.mdc-button.mdc-button--raised(type="submit") Submit
 

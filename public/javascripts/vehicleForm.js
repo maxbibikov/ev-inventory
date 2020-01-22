@@ -11,7 +11,7 @@ const selectCategory = new mdc.select.MDCSelect(
 );
 const adminTextField = document.querySelector('.admin-pass-text-field');
 if (adminTextField) {
-    const admin_pass = new mdc.textField.MDCTextField();
+    const admin_pass = new mdc.textField.MDCTextField(adminTextField);
 }
 
 selectCategory.listen('MDCSelect:change', () => {

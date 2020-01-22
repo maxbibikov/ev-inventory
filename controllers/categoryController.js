@@ -1,11 +1,11 @@
 const async = require('async');
 const { body, sanitizeBody, validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
 
 // Models
 const Category = require('../models/category');
 const Vehicle = require('../models/vehicle');
-
-const ADMIN_PASS = 'admin';
+const User = require('../models/user');
 
 exports.category_list = (req, res, next) => {
     Category.find({}).exec((err, categories) => {
@@ -116,12 +116,14 @@ exports.category_update_post = [
     body('admin_pass', 'Admin password is not valid')
         .notEmpty()
         .exists()
-        .matches(ADMIN_PASS),
+        .isString(),
     sanitizeBody(['category_name', 'admin_pass'])
         .trim()
         .escape(),
     (req, res, next) => {
         const categoryID = req.params.id;
+        const { admin_pass } = req.body;
+
         const category = new Category({
             _id: categoryID,
             name: req.body.category_name
@@ -135,28 +137,45 @@ exports.category_update_post = [
             });
         }
 
-        return Category.findByIdAndUpdate(categoryID, category).exec(
-            (err, updatedCategory) => {
-                if (err) {
-                    return next(err);
+        return User.findOne({ username: 'admin' })
+            .exec()
+            .then(user => {
+                return user.comparePassword(admin_pass);
+            })
+            .then(paswordMatches => {
+                if (!paswordMatches) {
+                    return res.render('categoryForm', {
+                        title: 'Update category',
+                        category,
+                        errors: [{ msg: 'Admin password is not valid' }]
+                    });
                 }
 
-                return res.redirect(updatedCategory.url);
-            }
-        );
+                return Category.findOneAndUpdate(
+                    { _id: categoryID },
+                    category
+                ).exec((err, updatedCategory) => {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    return res.redirect(updatedCategory.url);
+                });
+            })
+            .catch(err => next(err));
     }
 ];
 
 exports.category_delete_post = [
     body('admin_pass', 'Admin password is not valid')
         .notEmpty()
-        .exists()
-        .matches(ADMIN_PASS),
+        .exists(),
     sanitizeBody('admin_pass')
         .escape()
         .trim(),
     (req, res, next) => {
         const categoryID = req.params.id;
+        const { admin_pass } = req.body;
         const errors = validationResult(req);
         async.parallel(
             {
@@ -190,13 +209,31 @@ exports.category_delete_post = [
                     return next(notEmpty);
                 }
 
-                return Category.findByIdAndRemove(categoryID).exec(err => {
-                    if (err) {
-                        return next(err);
-                    }
+                return User.findOne({ username: 'admin' })
+                    .exec()
+                    .then(user => {
+                        return user.comparePassword(admin_pass);
+                    })
+                    .then(paswordMatches => {
+                        if (!paswordMatches) {
+                            return res.render('category', {
+                                title: category.name,
+                                category,
+                                categoryVehicles,
+                                errors: [{ msg: 'Admin password is not valid' }]
+                            });
+                        }
 
-                    return res.redirect('/inventory/categories');
-                });
+                        return Category.findOneAndRemove({
+                            _id: categoryID
+                        }).exec(err => {
+                            if (err) {
+                                return next(err);
+                            }
+
+                            return res.redirect('/inventory/categories');
+                        });
+                    });
             }
         );
     }
