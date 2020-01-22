@@ -412,10 +412,27 @@ exports.vehicleInstance_delete_post = [
                         });
                 }
 
-                return VehicleInstance.findOneAndRemove({ _id: vehicleInstanceID })
+                return VehicleInstance.findOne({ _id: vehicleInstanceID })
                     .exec()
-                    .then(() => {
-                        return res.redirect('/inventory/vehicle-instances');
+                    .then(vehicleInstance => {
+                        return fs.unlink(
+                            `public/images/${vehicleInstance.photo}`,
+                            err => {
+                                if (err) {
+                                    console.error(err);
+                                    return res.redirect(vehicleInstance.url);
+                                }
+
+                                return vehicleInstance
+                                    .remove()
+                                    .then(() =>
+                                        res.redirect(
+                                            '/inventory/vehicle-instances'
+                                        )
+                                    )
+                                    .catch(err => next(err));
+                            }
+                        );
                     })
                     .catch(err => next(err));
             });
