@@ -4,17 +4,20 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
+const compression = require('compression');
+const helmet = require('helmet');
 
 const indexRouter = require('./routes/index');
 const inventoryRouter = require('./routes/inventory');
 
 const app = express();
+app.use(helmet());
 
 const MONGODB_DEV_URL =
     'mongodb+srv://maxbibikov:4s0Hd2mwtJiSk0Z4Vw@cluster0-bbns4.gcp.mongodb.net/local_ev_inventory?retryWrites=true&w=majority';
 mongoose.connect(MONGODB_DEV_URL, {
     useNewUrlParser: true,
-    useUnifiedTopology: true,
+    useUnifiedTopology: true
 });
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'mongoDB connection error'));
@@ -27,6 +30,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(compression());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
