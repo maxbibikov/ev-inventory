@@ -15,7 +15,8 @@ app.use(helmet());
 
 const MONGODB_DEV_URL =
     'mongodb+srv://maxbibikov:4s0Hd2mwtJiSk0Z4Vw@cluster0-bbns4.gcp.mongodb.net/local_ev_inventory?retryWrites=true&w=majority';
-mongoose.connect(MONGODB_DEV_URL, {
+const mongoDB = process.env.MONGODB_URI || MONGODB_DEV_URL;
+mongoose.connect(mongoDB, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
