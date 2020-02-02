@@ -1,3 +1,4 @@
+require('dotenv').config();
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -12,9 +13,7 @@ const inventoryRouter = require('./routes/inventory');
 
 const app = express();
 app.use(helmet());
-
-const MONGODB_DEV_URL =
-    'mongodb+srv://maxbibikov:4s0Hd2mwtJiSk0Z4Vw@cluster0-bbns4.gcp.mongodb.net/local_ev_inventory?retryWrites=true&w=majority';
+const MONGODB_DEV_URL = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0-bbns4.gcp.mongodb.net/local_ev_inventory?retryWrites=true&w=majority`;
 const mongoDB = process.env.MONGODB_URI || MONGODB_DEV_URL;
 mongoose.connect(mongoDB, {
     useNewUrlParser: true,
