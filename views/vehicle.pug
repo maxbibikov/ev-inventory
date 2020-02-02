@@ -27,7 +27,8 @@ block content
                                 li.mdc-list-item.vehicleInstanceLink(onClick=`window.open('${vehicleInstance.url}', '_self')`)
                                     span.mdc-list-item__graphic ##{index + 1}
                                     span.mdc-list-item__graphic
-                                        img(src=vehicleInstance.photo_url, alt="" srcset="" style="width: 80px;")
+                                        if vehicleInstance.photo_url
+                                            img(src=vehicleInstance.photo_url, alt="" srcset="" style="width: 80px;")
                                     span.mdc-list-item__text 
                                         span.mdc-list-item__primary-text #[strong Price:] #{vehicleInstance.priceUSD}$
                                         span.mdc-list-item__secondary-text #[strong Year:] #{new Date(vehicleInstance.year).getFullYear()}

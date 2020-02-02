@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 const storage = multer.diskStorage({
-    destination: (req, file, callback) => callback(null, 'public/images/'),
+    destination: (req, file, callback) => callback(null, __dirname),
     filename: (req, file, callback) => {
         const uid = crypto.randomBytes(16).toString('hex');
         callback(null, `${uid}${path.extname(file.originalname)}`);
@@ -11,12 +11,15 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 const { body, sanitizeBody, validationResult } = require('express-validator');
 
 // Models
 const VehicleInstance = require('../models/vehicle-instance');
 const Vehicle = require('../models/vehicle');
 const User = require('../models/user');
+
+const PROD = process.env.NODE_ENV === 'production';
 
 exports.vehicleInstance_list = (req, res, next) => {
     VehicleInstance.find({})
@@ -161,41 +164,58 @@ exports.vehicleInstance_create_post = [
             priceUSD
         } = req.body;
 
-        const vehicleInstance = new VehicleInstance({
-            vehicle,
-            max_speed_kmh,
-            max_range_km,
-            battery_kwh,
-            condition,
-            year: new Date().setFullYear(year_num),
-            priceUSD,
-            photo: file.filename
-        });
-
-        if (!errors.isEmpty()) {
-            return Vehicle.find({})
-                .exec()
-                .then(vehicles => {
-                    if (!vehicles || vehicles.length === 0) {
-                        const notFoundError = new Error('Vehicles not found');
-                        notFoundError.status = 404;
-                        return next(notFoundError);
-                    }
-                    return res.render('vehicleInstanceForm', {
-                        title: 'New Vehicle Instance',
-                        errors: errors.array({ onlyFirstError: true }),
-                        vehicleInstance,
-                        years,
-                        conditionTypes,
-                        vehicles
-                    });
+        return cloudinary.uploader
+            .upload(file.path, {
+                folder: PROD ? 'ev-inventory' : 'ev-inventory-dev'
+            })
+            .then(result => {
+                const vehicleInstance = new VehicleInstance({
+                    vehicle,
+                    max_speed_kmh,
+                    max_range_km,
+                    battery_kwh,
+                    condition,
+                    year: new Date().setFullYear(year_num),
+                    priceUSD,
+                    photo: result.public_id,
+                    photo_url: result.secure_url
                 });
-        }
-        return vehicleInstance
-            .save()
-            .then(createdVehicleInstance =>
-                res.redirect(createdVehicleInstance.url)
-            )
+
+                if (!errors.isEmpty()) {
+                    return Vehicle.find({})
+                        .exec()
+                        .then(vehicles => {
+                            if (!vehicles || vehicles.length === 0) {
+                                const notFoundError = new Error(
+                                    'Vehicles not found'
+                                );
+                                notFoundError.status = 404;
+                                return next(notFoundError);
+                            }
+                            return res.render('vehicleInstanceForm', {
+                                title: 'New Vehicle Instance',
+                                errors: errors.array({ onlyFirstError: true }),
+                                vehicleInstance,
+                                years,
+                                conditionTypes,
+                                vehicles
+                            });
+                        });
+                }
+
+                // remove temporary image file
+                fs.unlink(file.path, err => {
+                    if (err) {
+                        console.log('Temporary file delete error: ', err);
+                    }
+                });
+                return vehicleInstance
+                    .save()
+                    .then(createdVehicleInstance =>
+                        res.redirect(createdVehicleInstance.url)
+                    )
+                    .catch(err => next(err));
+            })
             .catch(err => next(err));
     }
 ];
@@ -293,6 +313,7 @@ exports.vehicleInstance_update_post = [
             admin_pass
         } = req.body;
         const { file } = req;
+
         const vehicleInstance = new VehicleInstance({
             _id: req.params.id,
             vehicle,
@@ -302,7 +323,7 @@ exports.vehicleInstance_update_post = [
             year: new Date().setFullYear(year_num),
             priceUSD,
             condition,
-            photo: file ? file.filename : photo
+            photo
         });
 
         if (!errors.isEmpty()) {
@@ -348,24 +369,53 @@ exports.vehicleInstance_update_post = [
                             });
                         });
                 }
-                return VehicleInstance.findOneAndUpdate(
-                    { _id: vehicleInstance._id },
-                    vehicleInstance
-                )
-                    .then(updatedInstance => {
-                        // remove previous image file
-                        if (file) {
-                            return fs.unlink(`public/images/${photo}`, err => {
+
+                if (file) {
+                    // Upload file to cloudinary and save url to vehicle instance "photo" param
+                    return cloudinary.uploader
+                        .upload(file.path, {
+                            folder: PROD ? 'ev-inventory' : 'ev-inventory-dev'
+                        })
+                        .then(uploadedPhoto => {
+                            // remove temporary image file
+                            fs.unlink(file.path, err => {
                                 if (err) {
-                                    console.error(err);
-                                    return res.redirect(updatedInstance.url);
+                                    console.log(
+                                        'Temporary file delete error: ',
+                                        err
+                                    );
                                 }
-                                return res.redirect(updatedInstance.url);
                             });
-                        }
-                        return res.redirect(updatedInstance.url);
-                    })
-                    .catch(err => next(err));
+                            cloudinary.uploader.destroy(photo).catch(err => {
+                                console.log(
+                                    'Cloudinary delete file error: ',
+                                    err
+                                );
+                            });
+                            vehicleInstance.photo = uploadedPhoto.public_id;
+                            vehicleInstance.photo_url =
+                                uploadedPhoto.secure_url;
+
+                            return VehicleInstance.findOneAndUpdate(
+                                { _id: vehicleInstance._id },
+                                vehicleInstance
+                            )
+                                .then(updatedInstance => {
+                                    return res.redirect(updatedInstance.url);
+                                })
+                                .catch(err => next(err));
+                        })
+                        .catch(err => next(err));
+                } else {
+                    return VehicleInstance.findOneAndUpdate(
+                        { _id: vehicleInstance._id },
+                        vehicleInstance
+                    )
+                        .then(updatedInstance => {
+                            return res.redirect(updatedInstance.url);
+                        })
+                        .catch(err => next(err));
+                }
             });
     }
 ];
@@ -415,14 +465,9 @@ exports.vehicleInstance_delete_post = [
                 return VehicleInstance.findOne({ _id: vehicleInstanceID })
                     .exec()
                     .then(vehicleInstance => {
-                        return fs.unlink(
-                            `public/images/${vehicleInstance.photo}`,
-                            err => {
-                                if (err) {
-                                    console.error(err);
-                                    return res.redirect(vehicleInstance.url);
-                                }
-
+                        return cloudinary.uploader
+                            .destroy(vehicleInstance.photo)
+                            .then(() => {
                                 return vehicleInstance
                                     .remove()
                                     .then(() =>
@@ -431,8 +476,14 @@ exports.vehicleInstance_delete_post = [
                                         )
                                     )
                                     .catch(err => next(err));
-                            }
-                        );
+                            })
+                            .catch(err => {
+                                console.log(
+                                    'Cloudinary delete file error: ',
+                                    err
+                                );
+                                return res.redirect(vehicleInstance.url);
+                            });
                     })
                     .catch(err => next(err));
             });

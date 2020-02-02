@@ -7,9 +7,22 @@ const logger = require('morgan');
 const mongoose = require('mongoose');
 const compression = require('compression');
 const helmet = require('helmet');
+const cloudinary = require('cloudinary').v2;
 
 const indexRouter = require('./routes/index');
 const inventoryRouter = require('./routes/inventory');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET,
+});
+
+
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
 
 const app = express();
 app.use(helmet());
