@@ -343,7 +343,14 @@ exports.vehicleInstance_update_post = [
 
         return User.findOne({ username: 'admin' })
             .exec()
-            .then(user => user.comparePassword(admin_pass))
+            .then(user => {
+                if (!user) {
+                    const notFoundErr = new Error('User not found');
+                    notFoundErr.status = 404;
+                    return next(notFoundErr);
+                }
+                return user.comparePassword(admin_pass);
+            })
             .then(passwordMatches => {
                 if (!passwordMatches) {
                     return Vehicle.find({})
@@ -447,7 +454,14 @@ exports.vehicleInstance_delete_post = [
 
         return User.findOne({ username: 'admin' })
             .exec()
-            .then(user => user.comparePassword(admin_pass))
+            .then(user => {
+                if (!user) {
+                    const notFoundErr = new Error('User not found');
+                    notFoundErr.status = 404;
+                    return next(notFoundErr);
+                }
+                return user.comparePassword(admin_pass);
+            })
             .then(passwordMatches => {
                 if (!passwordMatches) {
                     return VehicleInstance.findOne({ _id: vehicleInstanceID })
