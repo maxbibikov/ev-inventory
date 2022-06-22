@@ -11,7 +11,7 @@
         "debug": "DEBUG=ev-inventory npm run devstart"
     },
     "dependencies": {
-        "async": "^3.1.0",
+        "async": "^3.2.2",
         "bcryptjs": "^2.4.3",
         "cloudinary": "^1.19.0",
         "compression": "^1.7.4",
